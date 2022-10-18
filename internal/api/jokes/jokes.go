@@ -5,22 +5,23 @@ import (
 	"fmt"
 	"net/http"
 	"workshop/internal/api"
+	"workshop/internal/config"
 )
 
 const getJokePath = "/api?format=json"
 
 type JokeClient struct {
-	url string
+	config *config.Config
 }
 
-func NewJokeClient(baseurl string) *JokeClient {
+func NewJokeClient(cfg *config.Config) *JokeClient {
 	return &JokeClient{
-		url: baseurl,
+		config: cfg,
 	}
 }
 
 func (jc *JokeClient) GetJoke() (*api.JokeResponse, error) {
-	urlPath := jc.url + getJokePath
+	urlPath := jc.config.BaseURL + getJokePath
 
 	resp, err := http.Get(urlPath)
 	if err != nil {

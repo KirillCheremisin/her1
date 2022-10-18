@@ -9,14 +9,18 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/BurntSushi/toml"
 	"github.com/go-chi/chi"
 
 	"workshop/internal/api/jokes"
+	"workshop/internal/config"
 	"workshop/internal/handler"
 )
 
 func main() {
-	apiClient := jokes.NewJokeClient("https://geek-jokes.sameerkumar.website/")
+	config := config.NewConfig()
+	_, err := toml.DecodeFile(config.DefaultConfigPath, config)
+	apiClient := jokes.NewJokeClient(config)
 
 	h := handler.NewHandler(apiClient)
 
@@ -43,7 +47,7 @@ func main() {
 	}()
 
 	log.Print("starting server")
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
 	}

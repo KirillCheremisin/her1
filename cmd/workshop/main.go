@@ -6,11 +6,14 @@ import (
 
 	"github.com/go-chi/chi"
 
+	"workshop/internal/api/jokes"
 	"workshop/internal/handler"
 )
 
 func main() {
-	h := handler.NewHandler()
+	apiClient := jokes.NewJokeClient("https://geek-jokes.sameerkumar.website/")
+
+	h := handler.NewHandler(apiClient)
 
 	r := chi.NewRouter()
 

@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/go-chi/chi"
 
@@ -19,9 +24,31 @@ func main() {
 
 	r.Get("/hello", h.Hello)
 
-	log.Print("starting server")
-	err := http.ListenAndServe(":8080", r)
-	log.Fatal(err)
+	srv := &http.Server{
+		Addr:    "0.0.0.0:8080",
+		Handler: r,
+	}
 
-	log.Print("shutting server down")
+	quit := make(chan os.Signal, 1)
+	done := make(chan error, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-quit
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+		err := srv.Shutdown(ctx)
+		// ...
+		done <- err
+	}()
+
+	log.Print("starting server")
+	err := srv.ListenAndServe()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = <-done
+
+	log.Printf("shutting server down with %v", err)
 }

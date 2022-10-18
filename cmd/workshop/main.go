@@ -20,6 +20,10 @@ import (
 func main() {
 	config := config.NewConfig()
 	_, err := toml.DecodeFile(config.DefaultConfigPath, config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	apiClient := jokes.NewJokeClient(config)
 
 	h := handler.NewHandler(apiClient)
